@@ -6,7 +6,7 @@ vi.mock('@google/genai', () => {
   return {
     GoogleGenAI: class MockGoogleGenAI {
       models = {
-        generateContent: vi.fn().mockImplementation(async ({ model, contents }) => {
+        generateContent: vi.fn().mockImplementation(async ({ contents }) => {
           if (contents === 'trigger-error') {
             throw new Error('API failure simulation');
           }
@@ -56,7 +56,7 @@ describe('Gemini Client Helper', () => {
 
     const result = await generateContent('test-prompt');
     expect(result.fallback).toBe(false);
-    expect(result.model).toBe('gemini-2.0-flash');
+    expect(result.model).toBe('gemini-2.5-flash');
     expect(result.text).toBe('Mocked response for: test-prompt');
   });
 

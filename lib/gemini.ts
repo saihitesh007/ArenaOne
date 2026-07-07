@@ -10,7 +10,7 @@ import { GoogleGenAI } from '@google/genai';
  * - Configurable model and system instructions
  */
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 const FALLBACK_RESPONSE = 'ArenaOne is online. AI services are temporarily unavailable. Please try again shortly.';
 
@@ -79,7 +79,7 @@ export async function generateContent(
       fallback: false,
     };
   } catch (error) {
-    console.error('[ArenaOne] Gemini API error:', error);
+    console.error('[ArenaOne] Gemini API raw error object:', error);
 
     // Determine if it's a rate limit error for specific messaging
     const isRateLimit =
