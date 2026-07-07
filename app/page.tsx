@@ -14,6 +14,9 @@ type ChatResponse = {
   model: string;
 };
 
+type RoleView = 'fan' | 'staff';
+type StaffPanel = 'incidents' | 'crowd' | 'summary';
+
 const initialMessages: ChatMessage[] = [
   {
     id: 'welcome',
@@ -29,12 +32,19 @@ const suggestedPrompts = [
   'How do I reach Medical Point Alpha from Gate 4?',
 ];
 
+const staffTabs: { id: StaffPanel; label: string }[] = [
+  { id: 'incidents', label: 'Incidents' },
+  { id: 'crowd', label: 'Crowd Intelligence' },
+  { id: 'summary', label: 'Situation Summary' },
+];
+
 export default function Home() {
+  const [activeView, setActiveView] = useState<RoleView>('fan');
+  const [activeStaffPanel, setActiveStaffPanel] = useState<StaffPanel>('incidents');
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [message, setMessage] = useState('');
   const [accessibilityMode, setAccessibilityMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState('Ready');
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +74,6 @@ export default function Home() {
     setMessages((currentMessages) => [...currentMessages, userMessage]);
     setMessage('');
     setIsLoading(true);
-    setStatus('ArenaOne is thinking');
 
     try {
       const response = await fetch('/api/chat', {
@@ -85,6 +94,10 @@ export default function Home() {
 
       const data = (await response.json()) as ChatResponse;
 
+      if (data.fallback) {
+        console.warn('[ArenaOne] Chat fallback response shown to user.');
+      }
+
       setMessages((currentMessages) => [
         ...currentMessages,
         {
@@ -93,8 +106,9 @@ export default function Home() {
           content: data.response,
         },
       ]);
-      setStatus(data.fallback ? 'Fallback answer shown' : `Answered by ${data.model}`);
     } catch (error) {
+      console.warn('[ArenaOne] Chat request failed:', error);
+
       const fallbackMessage =
         error instanceof Error
           ? error.message
@@ -108,7 +122,6 @@ export default function Home() {
           content: fallbackMessage,
         },
       ]);
-      setStatus('Connection issue');
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
@@ -121,114 +134,322 @@ export default function Home() {
   }
 
   return (
-    <main className="chat-shell" aria-labelledby="chat-title">
-      <section className="chat-hero" aria-describedby="chat-subtitle">
-        <div>
-          <span className="eyebrow">FIFA World Cup 2026 Stadium Assistant</span>
-          <h1 id="chat-title">ArenaOne Fan Help</h1>
-          <p id="chat-subtitle">
-            Ask for routes, accessible washrooms, food stalls, medical points, gates,
-            and seating sections. I only use the stadium graph.
-          </p>
-        </div>
-
-        <label className="simple-toggle">
-          <span>
-            <strong>Accessibility Mode</strong>
-            <small>Simple words, bigger text, stronger contrast.</small>
-          </span>
-          <input
-            type="checkbox"
-            checked={accessibilityMode}
-            onChange={(event) => setAccessibilityMode(event.target.checked)}
-            aria-label="Toggle accessibility simple mode"
-          />
-        </label>
-      </section>
-
-      <section className="chat-workspace glass-card" aria-label="ArenaOne chat workspace">
-        <div className="chat-toolbar">
-          <div>
-            <strong>Live fan assistant</strong>
-            <span aria-live="polite">{status}</span>
-          </div>
+    <div className="app-shell">
+      <header className="top-nav">
+        <div className="app-container nav-inner">
           <button
             type="button"
-            className="btn btn-secondary"
-            onClick={() => {
-              setMessages(initialMessages);
-              setStatus('Ready');
-              inputRef.current?.focus();
-            }}
+            className="brand-lockup"
+            onClick={() => setActiveView('fan')}
+            aria-label="Go to ArenaOne Fan Assistant"
           >
-            Reset chat
+            <span className="brand-mark" aria-hidden="true">
+              A1
+            </span>
+            <span>
+              <strong>ArenaOne</strong>
+              <small>World Cup Stadium OS</small>
+            </span>
           </button>
-        </div>
 
-        <div
-          ref={logRef}
-          className="chat-log"
-          role="log"
-          aria-live="polite"
-          aria-relevant="additions text"
-          aria-label="Conversation messages"
-        >
-          {messages.map((chatMessage) => (
-            <article
-              key={chatMessage.id}
-              className={`chat-bubble ${chatMessage.role === 'user' ? 'user-bubble' : 'ai-bubble'}`}
-              aria-label={chatMessage.role === 'user' ? 'Your message' : 'ArenaOne response'}
-            >
-              <span>{chatMessage.role === 'user' ? 'You' : 'ArenaOne'}</span>
-              <p>{chatMessage.content}</p>
-            </article>
-          ))}
-
-          {isLoading && (
-            <article className="chat-bubble ai-bubble loading-bubble" aria-label="ArenaOne is typing">
-              <span>ArenaOne</span>
-              <p>Checking the stadium graph…</p>
-            </article>
-          )}
-        </div>
-
-        <div className="prompt-chips" aria-label="Suggested prompts">
-          {suggestedPrompts.map((prompt) => (
+          <nav className="role-tabs" aria-label="Role views">
             <button
-              key={prompt}
               type="button"
-              onClick={() => void sendMessage(prompt)}
-              disabled={isLoading}
+              className={activeView === 'fan' ? 'active' : ''}
+              onClick={() => setActiveView('fan')}
+              aria-current={activeView === 'fan' ? 'page' : undefined}
             >
-              {prompt}
+              Fan Assistant
             </button>
-          ))}
+            <button
+              type="button"
+              className={activeView === 'staff' ? 'active' : ''}
+              onClick={() => setActiveView('staff')}
+              aria-current={activeView === 'staff' ? 'page' : undefined}
+            >
+              Staff Dashboard
+            </button>
+          </nav>
         </div>
+      </header>
 
-        <form className="chat-form" onSubmit={handleSubmit}>
-          <label htmlFor="fan-message">Ask ArenaOne</label>
+      <main className="app-container main-content">
+        {activeView === 'fan' ? (
+          <section className="fan-view" aria-labelledby="fan-title">
+            <div className="page-heading">
+              <span className="eyebrow">Fan Assistant</span>
+              <div>
+                <h1 id="fan-title">Find your next stadium step.</h1>
+                <p>
+                  Ask for routes, accessible washrooms, food stalls, medical points,
+                  gates, and seating sections. ArenaOne answers only from the stadium graph.
+                </p>
+              </div>
+            </div>
+
+            <section className="assistant-grid">
+              <aside className="info-panel" aria-label="Assistant capabilities">
+                <div className="mode-card">
+                  <div>
+                    <h2>Simple Mode</h2>
+                    <p>Bigger text, higher contrast, and shorter directions.</p>
+                  </div>
+                  <label className="switch-control">
+                    <span className="sr-only">Toggle accessibility simple mode</span>
+                    <input
+                      type="checkbox"
+                      checked={accessibilityMode}
+                      onChange={(event) => setAccessibilityMode(event.target.checked)}
+                    />
+                    <span aria-hidden="true" />
+                  </label>
+                </div>
+
+                <div className="quick-card">
+                  <h2>Try asking</h2>
+                  <div className="prompt-chips" aria-label="Suggested prompts">
+                    {suggestedPrompts.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        onClick={() => void sendMessage(prompt)}
+                        disabled={isLoading}
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="metrics-card" aria-label="Available stadium graph data">
+                  <div>
+                    <strong>8</strong>
+                    <span>Gates</span>
+                  </div>
+                  <div>
+                    <strong>8</strong>
+                    <span>Sections</span>
+                  </div>
+                  <div>
+                    <strong>7</strong>
+                    <span>Facilities</span>
+                  </div>
+                </div>
+              </aside>
+
+              <section className="chat-card" aria-label="ArenaOne chat workspace">
+                <div className="chat-card-header">
+                  <div>
+                    <h2>Live Guidance</h2>
+                    <p>Multilingual directions, facilities, and food help.</p>
+                  </div>
+                  <span className="subtle-badge" aria-live="polite">
+                    {isLoading ? 'Thinking' : 'Ready'}
+                  </span>
+                </div>
+
+                <div
+                  ref={logRef}
+                  className="chat-log"
+                  role="log"
+                  aria-live="polite"
+                  aria-relevant="additions text"
+                  aria-label="Conversation messages"
+                >
+                  {messages.map((chatMessage) => (
+                    <article
+                      key={chatMessage.id}
+                      className={`message-row ${chatMessage.role === 'user' ? 'message-user' : 'message-ai'}`}
+                      aria-label={chatMessage.role === 'user' ? 'Your message' : 'ArenaOne response'}
+                    >
+                      <div className="message-avatar" aria-hidden="true">
+                        {chatMessage.role === 'user' ? 'You' : 'AI'}
+                      </div>
+                      <div className="chat-bubble">
+                        <span>{chatMessage.role === 'user' ? 'You' : 'ArenaOne'}</span>
+                        <p>{chatMessage.content}</p>
+                      </div>
+                    </article>
+                  ))}
+
+                  {isLoading && (
+                    <article className="message-row message-ai" aria-label="ArenaOne is typing">
+                      <div className="message-avatar" aria-hidden="true">
+                        AI
+                      </div>
+                      <div className="chat-bubble loading-bubble">
+                        <span>ArenaOne</span>
+                        <p>Checking the stadium graph…</p>
+                      </div>
+                    </article>
+                  )}
+                </div>
+
+                <form className="chat-form" onSubmit={handleSubmit}>
+                  <label htmlFor="fan-message">Ask ArenaOne</label>
+                  <div className="composer-row">
+                    <input
+                      ref={inputRef}
+                      id="fan-message"
+                      className="input"
+                      type="text"
+                      value={message}
+                      onChange={(event) => setMessage(event.target.value)}
+                      placeholder="Example: nearest accessible washroom to Gate 4"
+                      disabled={isLoading}
+                      aria-describedby="chat-help"
+                      autoComplete="off"
+                    />
+                    <button
+                      className="btn btn-primary"
+                      type="submit"
+                      disabled={isLoading || !message.trim()}
+                    >
+                      {isLoading ? 'Sending…' : 'Send'}
+                    </button>
+                  </div>
+                  <p id="chat-help">Press Enter to send. Use Tab to navigate every control.</p>
+                </form>
+              </section>
+            </section>
+          </section>
+        ) : (
+          <section className="staff-view" aria-labelledby="staff-title">
+            <div className="page-heading">
+              <span className="eyebrow">Feature 6</span>
+              <div>
+                <h1 id="staff-title">Staff Dashboard</h1>
+                <p>
+                  A single operational shell for incident triage, crowd pressure,
+                  and executive summaries during matchday.
+                </p>
+              </div>
+            </div>
+
+            <div className="dashboard-shell">
+              <aside className="dashboard-sidebar" aria-label="Staff dashboard sections">
+                {staffTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    className={activeStaffPanel === tab.id ? 'active' : ''}
+                    onClick={() => setActiveStaffPanel(tab.id)}
+                    aria-current={activeStaffPanel === tab.id ? 'true' : undefined}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </aside>
+
+              <section className="dashboard-panel" aria-live="polite">
+                {activeStaffPanel === 'incidents' && <IncidentsPanel />}
+                {activeStaffPanel === 'crowd' && <CrowdPanel />}
+                {activeStaffPanel === 'summary' && <SummaryPanel />}
+              </section>
+            </div>
+          </section>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function IncidentsPanel() {
+  return (
+    <>
+      <div className="panel-header">
+        <div>
+          <span className="section-kicker">Incidents</span>
+          <h2>Active response queue</h2>
+        </div>
+        <span className="subtle-badge warning">3 open</span>
+      </div>
+      <div className="incident-list">
+        <article>
+          <span className="severity high">High</span>
           <div>
-            <input
-              ref={inputRef}
-              id="fan-message"
-              className="input"
-              type="text"
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              placeholder="Example: nearest accessible washroom to Gate 4"
-              disabled={isLoading}
-              aria-describedby="chat-help"
-              autoComplete="off"
-            />
-            <button className="btn btn-primary" type="submit" disabled={isLoading || !message.trim()}>
-              {isLoading ? 'Sending…' : 'Send'}
-            </button>
+            <h3>Medical assist near Section F</h3>
+            <p>Dispatch Medical Point Beta. Keep west concourse lane clear.</p>
           </div>
-          <p id="chat-help">
-            Press Enter to send. Use Tab to move through the workspace.
+        </article>
+        <article>
+          <span className="severity medium">Medium</span>
+          <div>
+            <h3>Queue buildup at Gate 4</h3>
+            <p>Redirect late arrivals toward Gate 3 and open south overflow lane.</p>
+          </div>
+        </article>
+        <article>
+          <span className="severity low">Low</span>
+          <div>
+            <h3>Lost item report at Gate 8</h3>
+            <p>Route guest to Information Desk via Concourse Northwest.</p>
+          </div>
+        </article>
+      </div>
+    </>
+  );
+}
+
+function CrowdPanel() {
+  return (
+    <>
+      <div className="panel-header">
+        <div>
+          <span className="section-kicker">Crowd Intelligence</span>
+          <h2>Pressure by zone</h2>
+        </div>
+        <span className="subtle-badge">Live model</span>
+      </div>
+      <div className="crowd-grid">
+        {[
+          ['Gate 4', '82%', 'Heavy arrival flow'],
+          ['Section C', '64%', 'Stable movement'],
+          ['Concourse West', '48%', 'Normal'],
+          ['Gate 8', '31%', 'Light traffic'],
+        ].map(([zone, value, note]) => (
+          <article key={zone}>
+            <div>
+              <h3>{zone}</h3>
+              <span>{note}</span>
+            </div>
+            <strong>{value}</strong>
+            <div className="meter" aria-hidden="true">
+              <span style={{ width: value }} />
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function SummaryPanel() {
+  return (
+    <>
+      <div className="panel-header">
+        <div>
+          <span className="section-kicker">Situation Summary</span>
+          <h2>Matchday command brief</h2>
+        </div>
+        <span className="subtle-badge success">Operational</span>
+      </div>
+      <div className="summary-layout">
+        <article>
+          <h3>Current priority</h3>
+          <p>
+            Reduce Gate 4 congestion while maintaining an accessible route toward
+            Medical Point Alpha and Section D.
           </p>
-        </form>
-      </section>
-    </main>
+        </article>
+        <article>
+          <h3>Recommended action</h3>
+          <p>
+            Move two stewards to Concourse South, add signage toward Gate 3,
+            and keep Accessible Washroom B visible in fan guidance.
+          </p>
+        </article>
+      </div>
+    </>
   );
 }
