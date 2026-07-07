@@ -38,7 +38,17 @@ export const chatRequestSchema = z.object({
     .min(1, 'Message cannot be empty')
     .max(1000, 'Message must be 1000 characters or fewer'),
   accessibilityMode: z.boolean(),
+  currentZoneId: z.string().min(1).max(50).optional(),
 });
 
 export type ChatRequestInput = z.infer<typeof chatRequestSchema>;
 
+export const zoneCheckInSchema = z.object({
+  zoneId: z.string().min(1, 'Zone is required').max(50),
+  anonymousSessionId: z
+    .string()
+    .min(8, 'Anonymous session id is required')
+    .max(80, 'Anonymous session id is too long'),
+});
+
+export type ZoneCheckInInput = z.infer<typeof zoneCheckInSchema>;

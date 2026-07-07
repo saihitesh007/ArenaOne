@@ -98,3 +98,11 @@ export const STADIUM_GRAPH: StadiumGraph = {
     { from: 'sec-h', to: 'sec-a', distanceMeters: 110, description: 'via Concourse H-A' }
   ]
 };
+
+export const STADIUM_ZONES = STADIUM_GRAPH.nodes.filter(
+  (node) => node.type === 'gate' || node.type === 'section'
+);
+
+export function getStadiumZoneById(zoneId: string) {
+  return STADIUM_ZONES.find((zone) => zone.id === zoneId);
+}

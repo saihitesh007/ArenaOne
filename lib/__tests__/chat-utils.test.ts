@@ -41,4 +41,16 @@ describe('buildChatPrompt', () => {
     expect(result.systemInstruction).toContain('Medical Point Alpha');
     expect(result.systemInstruction).toContain('gate-4 -> sec-d');
   });
+
+  it('includes current self-reported zone context when provided', () => {
+    const result = buildChatPrompt({
+      message: 'Where should I go for help?',
+      accessibilityMode: false,
+      currentZoneId: 'gate-4',
+    });
+
+    expect(result.systemInstruction).toContain('Current fan self-reported zone');
+    expect(result.systemInstruction).toContain('Gate 4');
+    expect(result.systemInstruction).toContain('not GPS or live tracking');
+  });
 });

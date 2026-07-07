@@ -1,4 +1,4 @@
-import { STADIUM_GRAPH, StadiumGraph } from './data/stadium-graph';
+import { getStadiumZoneById, STADIUM_GRAPH, StadiumGraph } from './data/stadium-graph';
 
 /**
  * Pure logic function that formats the stadium zone graph and builds the complete system instruction
@@ -96,6 +96,7 @@ function formatStadiumGraph(stadiumGraph: StadiumGraph): string {
 export interface BuildChatPromptOptions {
   message: string;
   accessibilityMode: boolean;
+  currentZoneId?: string;
   stadiumGraph?: StadiumGraph;
 }
 
@@ -107,17 +108,25 @@ export interface ChatPrompt {
 export function buildChatPrompt({
   message,
   accessibilityMode,
+  currentZoneId,
   stadiumGraph = STADIUM_GRAPH,
 }: BuildChatPromptOptions): ChatPrompt {
+  const currentZone = currentZoneId ? getStadiumZoneById(currentZoneId) : undefined;
+  const currentZoneContext = currentZone
+    ? `\nCurrent fan self-reported zone: ${currentZone.name} (${currentZone.id}). If helpful, naturally reference this location, for example "since you're near ${currentZone.name}..." Do not imply GPS or live tracking.`
+    : '';
+
   const systemInstruction = `You are ArenaOne, the official stadium assistant for FIFA World Cup 2026 fans.
 
 Use this stadium graph as the only source of truth:
 ${formatStadiumGraph(stadiumGraph)}
+${currentZoneContext}
 
 Rules:
 - Detect the user's language and respond in the same language.
 - Use only gates, sections, paths, facilities, menu items, prices, and accessibility data from the graph.
 - Do not fabricate non-existent gates, stalls, sections, shortcuts, foods, prices, or facilities.
+- Treat any current zone as a fan self-reported check-in, not GPS or live tracking.
 - When giving directions, format paths like: Gate 4 -> Concourse C-D -> Section C -> Accessible Washroom B, ~170m.
 - Include total estimated distance when a route is requested.
 - For accessibility requests, recommend only facilities marked accessible: true.

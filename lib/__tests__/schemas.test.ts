@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { chatRequestSchema, healthCheckSchema } from '../schemas';
+import { chatRequestSchema, healthCheckSchema, zoneCheckInSchema } from '../schemas';
 
 describe('Zod Input Schemas', () => {
   describe('healthCheckSchema', () => {
@@ -70,6 +70,36 @@ describe('Zod Input Schemas', () => {
       const result = chatRequestSchema.safeParse({
         message: 'Where is Gate 4?',
         accessibilityMode: 'yes',
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('should allow optional currentZoneId for chat context', () => {
+      const result = chatRequestSchema.safeParse({
+        message: 'How do I get food?',
+        accessibilityMode: false,
+        currentZoneId: 'gate-4',
+      });
+
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('zoneCheckInSchema', () => {
+    it('should validate anonymous zone check-ins', () => {
+      const result = zoneCheckInSchema.safeParse({
+        zoneId: 'gate-4',
+        anonymousSessionId: 'anon_123456789',
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject short anonymous session ids', () => {
+      const result = zoneCheckInSchema.safeParse({
+        zoneId: 'gate-4',
+        anonymousSessionId: 'short',
       });
 
       expect(result.success).toBe(false);

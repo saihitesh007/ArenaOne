@@ -49,6 +49,7 @@ export async function POST(request: Request) {
     const { prompt, systemInstruction } = buildChatPrompt({
       message: validation.data.message,
       accessibilityMode: validation.data.accessibilityMode,
+      currentZoneId: validation.data.currentZoneId,
       stadiumGraph: STADIUM_GRAPH,
     });
 
