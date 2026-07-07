@@ -1,0 +1,44 @@
+import { z } from 'zod';
+
+/**
+ * Zod schemas for API route input validation.
+ * Centralized here so schemas can be reused across routes and tests.
+ */
+
+/**
+ * Schema for the /api/health endpoint.
+ * Accepts a prompt string for testing the Gemini connection.
+ */
+export const healthCheckSchema = z.object({
+  prompt: z
+    .string()
+    .min(1, 'Prompt cannot be empty')
+    .max(500, 'Prompt must be 500 characters or fewer'),
+});
+
+export type HealthCheckInput = z.infer<typeof healthCheckSchema>;
+
+/**
+ * Generic error response schema (for documentation/testing).
+ */
+export const errorResponseSchema = z.object({
+  error: z.string(),
+  details: z.unknown().optional(),
+});
+
+export type ErrorResponse = z.infer<typeof errorResponseSchema>;
+
+/**
+ * Schema for the /api/chat endpoint.
+ * Accepts the user message and the accessibility toggle status.
+ */
+export const chatRequestSchema = z.object({
+  message: z
+    .string()
+    .min(1, 'Message cannot be empty')
+    .max(1000, 'Message must be 1000 characters or fewer'),
+  accessibilityMode: z.boolean(),
+});
+
+export type ChatRequestInput = z.infer<typeof chatRequestSchema>;
+
