@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { chatRequestSchema, healthCheckSchema, zoneCheckInSchema } from '../schemas';
+import {
+  chatRequestSchema,
+  crowdDensityReportSchema,
+  healthCheckSchema,
+  incidentSubmissionSchema,
+  zoneCheckInSchema,
+} from '../schemas';
 
 describe('Zod Input Schemas', () => {
   describe('healthCheckSchema', () => {
@@ -103,6 +109,37 @@ describe('Zod Input Schemas', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('incidentSubmissionSchema', () => {
+    it('should validate incident submissions', () => {
+      const result = incidentSubmissionSchema.safeParse({
+        description: 'kid lost near section D wearing blue jersey',
+        reporterRole: 'volunteer',
+      });
+
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('crowdDensityReportSchema', () => {
+    it('should validate transport reports and default crowd category', () => {
+      const transportResult = crowdDensityReportSchema.safeParse({
+        zoneId: 'gate-4',
+        category: 'transport',
+        note: 'Parking Exit B blocked',
+      });
+      const defaultResult = crowdDensityReportSchema.safeParse({
+        zoneId: 'gate-7',
+        note: 'Gate 7 crowded',
+      });
+
+      expect(transportResult.success).toBe(true);
+      expect(defaultResult.success).toBe(true);
+      if (defaultResult.success) {
+        expect(defaultResult.data.category).toBe('crowd');
+      }
     });
   });
 });

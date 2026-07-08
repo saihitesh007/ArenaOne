@@ -1,5 +1,5 @@
 import { FieldValue } from 'firebase-admin/firestore';
-import { getAdminDb } from './firebase-admin';
+import { addFirestoreDocument } from './firestore-data';
 
 export const CROWD_DENSITY_COLLECTION = 'crowdDensityReports';
 
@@ -13,6 +13,12 @@ export interface CrowdDensitySignal {
   anonymousSessionId?: string;
   note?: string;
   timestamp?: string;
+}
+
+export interface CrowdDensityReportInput {
+  zoneId: string;
+  category?: CrowdDensityCategory;
+  note: string;
 }
 
 export interface ZoneDensitySummary {
@@ -63,9 +69,7 @@ export function aggregateCrowdDensitySignals(
  * @returns The Firestore document reference created for the signal.
  */
 export async function writeCrowdDensitySignal(signal: CrowdDensitySignal) {
-  const db = getAdminDb();
-
-  return db.collection(CROWD_DENSITY_COLLECTION).add({
+  return addFirestoreDocument(CROWD_DENSITY_COLLECTION, {
     zoneId: signal.zoneId,
     source: signal.source,
     category: signal.category ?? 'crowd',

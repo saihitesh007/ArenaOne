@@ -19,6 +19,8 @@ ArenaOne is a GenAI-enabled stadium companion for FIFA World Cup 2026 matchdays.
 - **Accessibility Mode:** Simple wording, larger text, higher contrast, keyboard-friendly controls, and live chat announcements.
 - **Zone Check-In:** Anonymous, self-reported zone check-ins feed the shared crowd-density signal. No GPS or live tracking.
 - **Post-Match Transport:** Metro, bus, parking-exit mappings, and sample wait times are included in the graph context.
+- **Incident Submission:** Staff reports are structured into category, priority, location, and recommended action through the incident API.
+- **Crowd Intelligence:** Staff reports, transport alerts, and anonymous fan check-ins share the same Firestore-backed density pipeline.
 - **Staff Dashboard:** Incidents, crowd intelligence, transport congestion, and situation summary views share one operational shell.
 
 ## Problem Statement Coverage
@@ -49,8 +51,10 @@ ArenaOne is a GenAI-enabled stadium companion for FIFA World Cup 2026 matchdays.
 app/
   api/
     chat/route.ts
+    crowd-density/route.ts
     crowd-density/check-in/route.ts
     health/route.ts
+    incidents/route.ts
   globals.css
   layout.tsx
   page.tsx
@@ -60,7 +64,9 @@ lib/
   crowd-density.ts
   data/stadium-graph.ts
   firebase-admin.ts
+  firestore-data.ts
   gemini.ts
+  incidents.ts
   rate-limit.ts
   schemas.ts
 ```
@@ -87,5 +93,7 @@ npm run lint
 npm run test:run
 npm run build
 ```
+
+Current local coverage: **12 Vitest files / 53 passing tests** covering prompt generation, schemas, Gemini fallback behavior, rate limiting, stadium graph transport data, incident parsing, crowd-density aggregation, and API route integration paths for chat, health, incidents, crowd reports, and check-ins.
 
 The GitHub Actions workflow in `.github/workflows/test.yml` runs lint, unit/integration tests, and build on every push to `main`.

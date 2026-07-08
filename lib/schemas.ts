@@ -52,3 +52,24 @@ export const zoneCheckInSchema = z.object({
 });
 
 export type ZoneCheckInInput = z.infer<typeof zoneCheckInSchema>;
+
+export const incidentSubmissionSchema = z.object({
+  description: z
+    .string()
+    .min(5, 'Incident description must be at least 5 characters')
+    .max(1000, 'Incident description must be 1000 characters or fewer'),
+  reporterRole: z.string().min(2).max(80).optional(),
+});
+
+export type IncidentSubmissionInput = z.infer<typeof incidentSubmissionSchema>;
+
+export const crowdDensityReportSchema = z.object({
+  zoneId: z.string().min(1, 'Zone is required').max(50),
+  category: z.enum(['crowd', 'sustainability', 'transport']).default('crowd'),
+  note: z
+    .string()
+    .min(3, 'Report note must be at least 3 characters')
+    .max(500, 'Report note must be 500 characters or fewer'),
+});
+
+export type CrowdDensityReportInput = z.infer<typeof crowdDensityReportSchema>;
