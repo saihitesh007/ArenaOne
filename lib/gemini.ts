@@ -19,6 +19,8 @@ let _client: GoogleGenAI | null = null;
 /**
  * Returns the Gemini client singleton.
  * Returns null if GEMINI_API_KEY is not configured.
+ *
+ * @returns Configured Gemini client or null when unavailable.
  */
 function getClient(): GoogleGenAI | null {
   if (_client) return _client;
@@ -99,6 +101,8 @@ export async function generateContent(
 /**
  * Checks if the Gemini client is properly configured.
  * Useful for health checks.
+ *
+ * @returns True when GEMINI_API_KEY exists in the server environment.
  */
 export function isGeminiConfigured(): boolean {
   return !!process.env.GEMINI_API_KEY;

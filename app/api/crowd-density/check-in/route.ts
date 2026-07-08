@@ -45,6 +45,7 @@ export async function POST(request: Request) {
     await writeCrowdDensitySignal({
       zoneId: zone.id,
       source: 'fan_check_in',
+      category: 'crowd',
       anonymousSessionId: validation.data.anonymousSessionId,
       timestamp: new Date().toISOString(),
       note: 'Self-reported fan zone check-in',

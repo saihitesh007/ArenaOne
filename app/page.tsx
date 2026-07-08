@@ -31,6 +31,7 @@ const suggestedPrompts = [
   'nearest accessible washroom to Gate 4',
   'Where can I get vegetarian food under $10?',
   'How do I reach Medical Point Alpha from Gate 4?',
+  'How do I get to the metro after the match?',
 ];
 
 const staffTabs: { id: StaffPanel; label: string }[] = [
@@ -230,7 +231,7 @@ export default function Home() {
                 <h1 id="fan-title">Find your next stadium step.</h1>
                 <p>
                   Ask for routes, accessible washrooms, food stalls, medical points,
-                  gates, and seating sections. ArenaOne answers only from the stadium graph.
+                  transport exits, parking, gates, and seating sections. ArenaOne answers only from the stadium graph.
                 </p>
               </div>
             </div>
@@ -333,7 +334,7 @@ export default function Home() {
                   <div>
                     <h2>Live Guidance</h2>
                     <p>
-                      Multilingual directions, facilities, and food help.
+                      Multilingual directions, facilities, transport, parking, and food help.
                       {currentZone ? ` Current zone: ${currentZone.name}.` : ''}
                     </p>
                   </div>
@@ -494,7 +495,7 @@ function CrowdPanel({ currentZoneName }: { currentZoneName?: string }) {
           <h2>Pressure by zone</h2>
           <p>Density blends staff reports with anonymous fan zone check-ins.</p>
         </div>
-        <span className="subtle-badge">Live model</span>
+        <span className="subtle-badge">Shared pipeline</span>
       </div>
       {currentZoneName && (
         <div className="signal-note">
@@ -505,8 +506,8 @@ function CrowdPanel({ currentZoneName }: { currentZoneName?: string }) {
         {[
           ['Gate 4', '82%', 'Staff reports + fan check-ins show heavy arrival flow'],
           ['Section C', '64%', 'Blended signal shows stable movement'],
-          ['Concourse West', '48%', 'Staff reports indicate normal flow'],
-          ['Gate 8', '31%', 'Fan check-ins remain light'],
+          ['Parking Exit B', '58%', 'Transport reports flag slower post-match vehicle flow'],
+          ['Gate 8', '31%', 'Fan check-ins remain light near Parking Exit A'],
         ].map(([zone, value, note]) => (
           <article key={zone}>
             <div>
@@ -531,7 +532,7 @@ function SummaryPanel({ currentZoneName }: { currentZoneName?: string }) {
         <div>
           <span className="section-kicker">Situation Summary</span>
           <h2>Matchday command brief</h2>
-          <p>AI narrative uses the same blended density signal.</p>
+          <p>AI narrative uses the same blended density and transport signal.</p>
         </div>
         <span className="subtle-badge success">Operational</span>
       </div>
@@ -539,8 +540,8 @@ function SummaryPanel({ currentZoneName }: { currentZoneName?: string }) {
         <article>
           <h3>Current priority</h3>
           <p>
-            Reduce Gate 4 congestion using both steward density reports and anonymous
-            fan check-ins as the crowd signal.
+            Reduce Gate 4 congestion using steward reports, anonymous fan check-ins,
+            and transport alerts such as Parking Exit B blockage reports.
             {currentZoneName ? ` A recent fan self-check-in is near ${currentZoneName}.` : ''}
           </p>
         </article>
@@ -548,7 +549,7 @@ function SummaryPanel({ currentZoneName }: { currentZoneName?: string }) {
           <h3>Recommended action</h3>
           <p>
             Move two stewards to Concourse South, add signage toward Gate 3,
-            and keep Accessible Washroom B visible in fan guidance.
+            and route drivers from South Garage toward Parking Exit B only if it remains clear.
           </p>
         </article>
       </div>

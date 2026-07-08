@@ -40,6 +40,8 @@ let _adminAuth: Auth | null = null;
 
 /**
  * Returns the Firebase Admin app instance (lazy singleton).
+ *
+ * @returns Initialized Firebase Admin app.
  */
 export function getAdminApp(): App {
   if (!_adminApp) {
@@ -50,6 +52,8 @@ export function getAdminApp(): App {
 
 /**
  * Returns the Firestore instance (lazy singleton).
+ *
+ * @returns Server-side Firestore client.
  */
 export function getAdminDb(): Firestore {
   if (!_adminDb) {
@@ -60,6 +64,8 @@ export function getAdminDb(): Firestore {
 
 /**
  * Returns the Firebase Auth instance (lazy singleton).
+ *
+ * @returns Server-side Firebase Auth client.
  */
 export function getAdminAuth(): Auth {
   if (!_adminAuth) {

@@ -10,15 +10,16 @@ describe('crowd-density helpers', () => {
     const result = aggregateCrowdDensitySignals([
       { zoneId: 'gate-4', source: 'staff_report' },
       { zoneId: 'gate-4', source: 'fan_check_in', anonymousSessionId: 'anon_1' },
+      { zoneId: 'gate-4', source: 'staff_report', category: 'transport' },
       { zoneId: 'sec-c', source: 'fan_check_in', anonymousSessionId: 'anon_2' },
       { zoneId: 'gate-4', source: 'fan_check_in', anonymousSessionId: 'anon_3' },
     ]);
 
     expect(result[0]).toEqual({
       zoneId: 'gate-4',
-      staffReports: 1,
+      staffReports: 2,
       fanCheckIns: 2,
-      totalSignals: 3,
+      totalSignals: 4,
     });
     expect(result[1]).toEqual({
       zoneId: 'sec-c',

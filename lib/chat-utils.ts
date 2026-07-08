@@ -105,6 +105,12 @@ export interface ChatPrompt {
   prompt: string;
 }
 
+/**
+ * Builds the Gemini chat prompt and system instruction for a fan message.
+ *
+ * @param options - Fan message, accessibility flag, optional current zone, and graph override.
+ * @returns A user prompt plus system instruction containing graph and behavior context.
+ */
 export function buildChatPrompt({
   message,
   accessibilityMode,
@@ -124,8 +130,8 @@ ${currentZoneContext}
 
 Rules:
 - Detect the user's language and respond in the same language.
-- Use only gates, sections, paths, facilities, menu items, prices, and accessibility data from the graph.
-- Do not fabricate non-existent gates, stalls, sections, shortcuts, foods, prices, or facilities.
+- Use only gates, sections, paths, facilities, menu items, prices, transport exits, parking mappings, and accessibility data from the graph.
+- Do not fabricate non-existent gates, stalls, sections, shortcuts, foods, prices, transport routes, parking exits, or facilities.
 - Treat any current zone as a fan self-reported check-in, not GPS or live tracking.
 - When giving directions, format paths like: Gate 4 -> Concourse C-D -> Section C -> Accessible Washroom B, ~170m.
 - Include total estimated distance when a route is requested.

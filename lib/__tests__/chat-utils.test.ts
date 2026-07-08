@@ -42,6 +42,18 @@ describe('buildChatPrompt', () => {
     expect(result.systemInstruction).toContain('gate-4 -> sec-d');
   });
 
+  it('includes post-match transport and parking context', () => {
+    const result = buildChatPrompt({
+      message: 'Which parking exit should I use?',
+      accessibilityMode: false,
+    });
+
+    expect(result.systemInstruction).toContain('Metro Exit M1');
+    expect(result.systemInstruction).toContain('Bus Hub B2');
+    expect(result.systemInstruction).toContain('Parking Exit B');
+    expect(result.systemInstruction).toContain('Typical post-match wait');
+  });
+
   it('includes current self-reported zone context when provided', () => {
     const result = buildChatPrompt({
       message: 'Where should I go for help?',

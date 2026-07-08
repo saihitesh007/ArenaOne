@@ -2,7 +2,15 @@ export interface StadiumNode {
   id: string;
   name: string;
   type: 'gate' | 'section' | 'facility';
-  category?: 'washroom' | 'food' | 'medical' | 'accessibility' | 'exit' | 'info';
+  category?:
+    | 'washroom'
+    | 'food'
+    | 'medical'
+    | 'accessibility'
+    | 'exit'
+    | 'info'
+    | 'transport'
+    | 'parking';
   description: string;
   accessible: boolean;
   details?: string;
@@ -52,7 +60,12 @@ export const STADIUM_GRAPH: StadiumGraph = {
     
     { id: 'fac-med-1', name: 'Medical Point Alpha', type: 'facility', category: 'medical', description: 'Primary first aid station.', accessible: true, details: 'Doctor on duty. Defibrillator (AED) equipped. Wheelchair assistance.' },
     { id: 'fac-med-2', name: 'Medical Point Beta', type: 'facility', category: 'medical', description: 'First aid outpost.', accessible: true, details: 'Nurse on duty. Defibrillator (AED) equipped.' },
-    { id: 'fac-info-1', name: 'Information Desk', type: 'facility', category: 'info', description: 'Stadia helper services and lost property.', accessible: true, details: 'Lost and found registry. Multilingual helpers.' }
+    { id: 'fac-info-1', name: 'Information Desk', type: 'facility', category: 'info', description: 'Stadia helper services and lost property.', accessible: true, details: 'Lost and found registry. Multilingual helpers.' },
+
+    { id: 'transit-metro-north', name: 'Metro Exit M1', type: 'facility', category: 'transport', description: 'Post-match metro access for northbound trains near Gate 1.', accessible: true, details: 'Nearest zones: Gate 1, Gate 8, Section A, Section H. Typical post-match wait: 12-18 minutes. Best for downtown and airport transfers.' },
+    { id: 'transit-bus-east', name: 'Bus Hub B2', type: 'facility', category: 'transport', description: 'Post-match shuttle and city bus hub near Gate 3.', accessible: true, details: 'Nearest zones: Gate 2, Gate 3, Gate 4, Sections B-D. Typical post-match wait: 10-15 minutes. Use for hotel shuttles and east park-and-ride.' },
+    { id: 'parking-exit-a', name: 'Parking Exit A', type: 'facility', category: 'parking', description: 'Recommended parking exit for north and VIP parking zones.', accessible: true, details: 'Parking mapping: Lots A1-A4 and VIP North. Nearest zones: Gate 1, Gate 8. Typical post-match wait: 20-25 minutes.' },
+    { id: 'parking-exit-b', name: 'Parking Exit B', type: 'facility', category: 'parking', description: 'Recommended parking exit for west and south parking zones.', accessible: true, details: 'Parking mapping: Lots B1-B6, South Garage, accessible parking row S. Nearest zones: Gate 4, Gate 5, Gate 6, Sections D-F. Typical post-match wait: 25-35 minutes.' }
   ],
   edges: [
     // Gate 1 connections
@@ -86,6 +99,12 @@ export const STADIUM_GRAPH: StadiumGraph = {
     // Gate 8 connections
     { from: 'gate-8', to: 'sec-h', distanceMeters: 30, description: 'via Concourse Northwest' },
     { from: 'gate-8', to: 'fac-info-1', distanceMeters: 15, description: 'via Concourse Northwest' },
+    { from: 'gate-1', to: 'transit-metro-north', distanceMeters: 90, description: 'via North Transit Plaza' },
+    { from: 'gate-8', to: 'parking-exit-a', distanceMeters: 110, description: 'via VIP North Drive' },
+    { from: 'gate-3', to: 'transit-bus-east', distanceMeters: 85, description: 'via East Transit Walk' },
+    { from: 'gate-4', to: 'transit-bus-east', distanceMeters: 120, description: 'via South-East Transit Walk' },
+    { from: 'gate-5', to: 'parking-exit-b', distanceMeters: 95, description: 'via South Parking Ramp' },
+    { from: 'gate-6', to: 'parking-exit-b', distanceMeters: 115, description: 'via West Parking Ramp' },
 
     // Inter-concourse shortcuts
     { from: 'sec-a', to: 'sec-b', distanceMeters: 80, description: 'via Concourse A-B' },
@@ -103,6 +122,12 @@ export const STADIUM_ZONES = STADIUM_GRAPH.nodes.filter(
   (node) => node.type === 'gate' || node.type === 'section'
 );
 
-export function getStadiumZoneById(zoneId: string) {
+/**
+ * Finds a selectable gate or seating section by graph id.
+ *
+ * @param zoneId - Stadium zone id such as `gate-4` or `sec-c`.
+ * @returns The matching zone node, or `undefined` when the id is not a gate/section.
+ */
+export function getStadiumZoneById(zoneId: string): StadiumNode | undefined {
   return STADIUM_ZONES.find((zone) => zone.id === zoneId);
 }

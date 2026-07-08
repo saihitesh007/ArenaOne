@@ -4,10 +4,12 @@ import { getAdminDb } from './firebase-admin';
 export const CROWD_DENSITY_COLLECTION = 'crowdDensityReports';
 
 export type CrowdDensitySource = 'staff_report' | 'fan_check_in';
+export type CrowdDensityCategory = 'crowd' | 'sustainability' | 'transport';
 
 export interface CrowdDensitySignal {
   zoneId: string;
   source: CrowdDensitySource;
+  category?: CrowdDensityCategory;
   anonymousSessionId?: string;
   note?: string;
   timestamp?: string;
@@ -20,6 +22,12 @@ export interface ZoneDensitySummary {
   totalSignals: number;
 }
 
+/**
+ * Combines recent staff reports and anonymous fan check-ins by zone.
+ *
+ * @param signals - Raw density signals from the shared Firestore collection.
+ * @returns Zone summaries sorted from highest to lowest total signal count.
+ */
 export function aggregateCrowdDensitySignals(
   signals: CrowdDensitySignal[]
 ): ZoneDensitySummary[] {
@@ -48,12 +56,19 @@ export function aggregateCrowdDensitySignals(
   return [...summaries.values()].sort((a, b) => b.totalSignals - a.totalSignals);
 }
 
+/**
+ * Writes one crowd-density signal into the shared Firestore pipeline.
+ *
+ * @param signal - Staff or fan signal with zone id, source, optional category, and metadata.
+ * @returns The Firestore document reference created for the signal.
+ */
 export async function writeCrowdDensitySignal(signal: CrowdDensitySignal) {
   const db = getAdminDb();
 
   return db.collection(CROWD_DENSITY_COLLECTION).add({
     zoneId: signal.zoneId,
     source: signal.source,
+    category: signal.category ?? 'crowd',
     anonymousSessionId: signal.anonymousSessionId ?? null,
     note: signal.note ?? null,
     timestamp: FieldValue.serverTimestamp(),
