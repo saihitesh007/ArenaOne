@@ -28,4 +28,38 @@ describe('crowd-density helpers', () => {
       totalSignals: 1,
     });
   });
+
+  it('returns an empty array for zero signals', () => {
+    expect(aggregateCrowdDensitySignals([])).toEqual([]);
+  });
+
+  it('counts correctly when all signals are from a single source type', () => {
+    const result = aggregateCrowdDensitySignals([
+      { zoneId: 'gate-1', source: 'staff_report', category: 'crowd' },
+      { zoneId: 'gate-1', source: 'staff_report', category: 'transport' },
+      { zoneId: 'gate-1', source: 'staff_report', category: 'sustainability' },
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual({
+      zoneId: 'gate-1',
+      staffReports: 3,
+      fanCheckIns: 0,
+      totalSignals: 3,
+    });
+  });
+
+  it('sorts zones from highest to lowest total signal count', () => {
+    const result = aggregateCrowdDensitySignals([
+      { zoneId: 'sec-a', source: 'fan_check_in' },
+      { zoneId: 'gate-8', source: 'staff_report' },
+      { zoneId: 'gate-8', source: 'fan_check_in' },
+      { zoneId: 'gate-8', source: 'fan_check_in' },
+    ]);
+
+    expect(result[0].zoneId).toBe('gate-8');
+    expect(result[0].totalSignals).toBe(3);
+    expect(result[1].zoneId).toBe('sec-a');
+    expect(result[1].totalSignals).toBe(1);
+  });
 });
