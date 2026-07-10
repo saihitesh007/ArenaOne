@@ -25,16 +25,16 @@ ArenaOne is a GenAI-enabled stadium companion for FIFA World Cup 2026 matchdays.
 
 ## Problem Statement Coverage
 
-| Theme | ArenaOne Coverage |
-| --- | --- |
-| Navigation | Stadium graph routing for gates, sections, washrooms, medical points, food, and exits. |
-| Crowd Management | Shared `crowdDensityReports` pipeline blends staff-style reports with anonymous fan check-ins. |
-| Accessibility | Simple Mode, accessible washroom guidance, ARIA live chat log, keyboard-visible focus states. |
-| Transportation | Post-match metro, bus, and parking-exit guidance is included in the chat graph context and staff summary. |
-| Sustainability | Shared density/reporting model supports sustainability-style alerts such as full bins in the dashboard narrative. |
-| Multilingual Assistance | `/api/chat` prompt instructs Gemini to detect and respond in the user's language. |
-| Operational Intelligence | Staff dashboard summarizes incident queues, crowd pressure, transport congestion, and recommended actions. |
-| Real-Time Decision Support | Live-style UI states, check-ins, rate-limited API routes, and graceful AI fallbacks keep the app usable during outages. |
+| Theme | Target Personas | ArenaOne Implementation |
+| --- | --- | --- |
+| Navigation | Fans, Volunteers | Stadium graph routing for gates, sections, washrooms, medical points, food, and exits. |
+| Crowd Management | Venue Staff, Organizers | Shared `crowdDensityReports` pipeline blends staff-style reports with anonymous fan check-ins. |
+| Accessibility | Fans | Simple Mode, accessible washroom guidance, ARIA live chat log, keyboard-visible focus states. |
+| Transportation | Fans, Venue Staff | Post-match metro, bus, and parking-exit guidance in the chat graph; explicit transport congestion reporting in Staff Dashboard. |
+| Sustainability | Venue Staff | Shared density/reporting model supports sustainability-style alerts such as full bins in the dashboard narrative. |
+| Multilingual Assistance | Fans, Volunteers | `/api/chat` prompt instructs Gemini to detect and respond in the user's native language. |
+| Operational Intelligence | Venue Staff, Organizers | Staff dashboard explicitly summarizes incident queues, crowd pressure, transport congestion, and recommended actions. |
+| Real-Time Decision Support | Organizers | Live-style UI states, check-ins, rate-limited API routes, and graceful AI fallbacks keep the app usable during outages. |
 
 ## Persona Coverage
 

@@ -32,6 +32,7 @@ const suggestedPrompts = [
   'Where can I get vegetarian food under $10?',
   'How do I reach Medical Point Alpha from Gate 4?',
   'How do I get to the metro after the match?',
+  'Which parking exit should I use from Gate 4?',
 ];
 
 const staffTabs: { id: StaffPanel; label: string }[] = [
@@ -450,6 +451,31 @@ export default function Home() {
 }
 
 function IncidentsPanel() {
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+
+  async function submitIncident(e: FormEvent) {
+    e.preventDefault();
+    if (!description) return;
+    setIsSubmitting(true);
+    setMessage('');
+    try {
+      const res = await fetch('/api/incidents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description, reporterRole: 'Volunteer/Staff' })
+      });
+      if (!res.ok) throw new Error('Submission failed');
+      setDescription('');
+      setMessage('Incident reported successfully.');
+    } catch (err) {
+      setMessage('Failed to submit incident.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <>
       <div className="panel-header">
@@ -459,6 +485,26 @@ function IncidentsPanel() {
         </div>
         <span className="subtle-badge warning">3 open</span>
       </div>
+
+      <div className="report-form-card" style={{ marginBottom: 'var(--space-6)', padding: 'var(--space-4)', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-lg)' }}>
+        <h3 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-2)' }}>Volunteer & Staff Incident Report</h3>
+        <form onSubmit={submitIncident} style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          <input 
+            type="text" 
+            value={description} 
+            onChange={(e) => setDescription(e.target.value)} 
+            placeholder="e.g. kid lost near section D wearing blue jersey" 
+            className="input" 
+            disabled={isSubmitting}
+            required
+          />
+          <button type="submit" className="btn btn-primary" disabled={isSubmitting || !description}>
+            {isSubmitting ? 'Sending...' : 'Report'}
+          </button>
+        </form>
+        {message && <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--color-success)' }}>{message}</p>}
+      </div>
+
       <div className="incident-list">
         <article>
           <span className="severity high">High</span>
@@ -487,6 +533,34 @@ function IncidentsPanel() {
 }
 
 function CrowdPanel({ currentZoneName }: { currentZoneName?: string }) {
+  const [zoneId, setZoneId] = useState('');
+  const [category, setCategory] = useState<'crowd' | 'sustainability' | 'transport'>('crowd');
+  const [note, setNote] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+
+  async function submitReport(e: FormEvent) {
+    e.preventDefault();
+    if (!zoneId || !note) return;
+    setIsSubmitting(true);
+    setMessage('');
+    try {
+      const res = await fetch('/api/crowd-density', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ zoneId, category, note })
+      });
+      if (!res.ok) throw new Error('Submission failed');
+      setNote('');
+      setZoneId('');
+      setMessage('Report submitted.');
+    } catch (err) {
+      setMessage('Failed to submit report.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <>
       <div className="panel-header">
@@ -497,6 +571,31 @@ function CrowdPanel({ currentZoneName }: { currentZoneName?: string }) {
         </div>
         <span className="subtle-badge">Shared pipeline</span>
       </div>
+
+      <div className="report-form-card" style={{ marginBottom: 'var(--space-6)', padding: 'var(--space-4)', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-lg)' }}>
+        <h3 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-2)' }}>Volunteer & Staff Crowd / Transport Report</h3>
+        <form onSubmit={submitReport} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+            <select value={zoneId} onChange={(e) => setZoneId(e.target.value)} className="input" required>
+              <option value="">Select zone...</option>
+              {STADIUM_ZONES.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
+            </select>
+            <select value={category} onChange={(e) => setCategory(e.target.value as any)} className="input" style={{ maxWidth: '160px' }}>
+              <option value="crowd">Crowd</option>
+              <option value="transport">Transport</option>
+              <option value="sustainability">Sustainability</option>
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+            <input type="text" value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. Metro Gate 6 overcrowded" className="input" required disabled={isSubmitting} />
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting || !zoneId || !note}>
+              {isSubmitting ? 'Sending...' : 'Report'}
+            </button>
+          </div>
+        </form>
+        {message && <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--color-success)' }}>{message}</p>}
+      </div>
+
       {currentZoneName && (
         <div className="signal-note">
           Latest fan self-reported check-in: <strong>{currentZoneName}</strong>

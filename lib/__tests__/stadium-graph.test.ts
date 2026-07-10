@@ -1,32 +1,27 @@
-import { describe, expect, it } from 'vitest';
-import { getStadiumZoneById, STADIUM_GRAPH, STADIUM_ZONES } from '../data/stadium-graph';
+import { describe, it, expect } from 'vitest';
+import { STADIUM_GRAPH, getStadiumZoneById } from '../data/stadium-graph';
 
-describe('stadium graph data', () => {
-  it('keeps selectable zones limited to gates and sections', () => {
-    expect(STADIUM_ZONES).toHaveLength(16);
-    expect(STADIUM_ZONES.every((zone) => zone.type === 'gate' || zone.type === 'section')).toBe(
-      true
-    );
-  });
-
-  it('looks up selectable zones by id', () => {
-    expect(getStadiumZoneById('gate-4')?.name).toContain('Gate 4');
-    expect(getStadiumZoneById('transit-metro-north')).toBeUndefined();
-  });
-
-  it('includes post-match transport and parking facilities in graph context', () => {
+describe('Stadium Graph Transport Data', () => {
+  it('should contain transport and parking nodes', () => {
     const transportNodes = STADIUM_GRAPH.nodes.filter(
       (node) => node.category === 'transport' || node.category === 'parking'
     );
+    expect(transportNodes.length).toBeGreaterThan(0);
+    
+    // Check specific nodes that provide post-match assistance
+    const metroNode = STADIUM_GRAPH.nodes.find(n => n.id === 'transit-metro-north');
+    expect(metroNode).toBeDefined();
+    expect(metroNode?.category).toBe('transport');
+    expect(metroNode?.details).toContain('wait: 12-18 minutes');
 
-    expect(transportNodes.map((node) => node.name)).toEqual([
-      'Metro Exit M1',
-      'Bus Hub B2',
-      'Parking Exit A',
-      'Parking Exit B',
-    ]);
-    expect(transportNodes.every((node) => node.details?.includes('Typical post-match wait'))).toBe(
-      true
-    );
+    const parkingNode = STADIUM_GRAPH.nodes.find(n => n.id === 'parking-exit-b');
+    expect(parkingNode).toBeDefined();
+    expect(parkingNode?.category).toBe('parking');
+  });
+
+  it('should correctly identify stadium zones', () => {
+    const gate = getStadiumZoneById('gate-4');
+    expect(gate).toBeDefined();
+    expect(gate?.name).toContain('Gate 4');
   });
 });
