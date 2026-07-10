@@ -41,8 +41,8 @@ ArenaOne is a GenAI-enabled stadium companion for FIFA World Cup 2026 matchdays.
 | Persona | Supported Features |
 | --- | --- |
 | Fans | Chat assistant, zone check-in, accessibility mode, food lookup, route guidance, transport and parking help. |
-| Venue Staff | Staff dashboard, active incident cards, crowd-density summaries, transport congestion indicators. |
-| Volunteers | Clear operational recommendations and fan-safe routing language suitable for helping guests on the concourse. |
+| Venue Staff | Staff dashboard, Volunteer & Staff incident report form, crowd-density summaries, transport congestion reporting. |
+| Volunteers | Volunteer & Staff incident report form, clear operational recommendations, and fan-safe routing language for concourse assistance. |
 | Organizers | Situation summary panel maps crowd, transport, and incident signals into matchday priorities. |
 
 ## Project Structure
@@ -50,6 +50,7 @@ ArenaOne is a GenAI-enabled stadium companion for FIFA World Cup 2026 matchdays.
 ```text
 app/
   api/
+    __tests__/          ← route integration tests
     chat/route.ts
     crowd-density/route.ts
     crowd-density/check-in/route.ts
@@ -59,7 +60,7 @@ app/
   layout.tsx
   page.tsx
 lib/
-  __tests__/
+  __tests__/            ← unit tests
   chat-utils.ts
   crowd-density.ts
   data/stadium-graph.ts
@@ -94,6 +95,6 @@ npm run test:run
 npm run build
 ```
 
-Current local coverage: **12 Vitest files / 53 passing tests** covering prompt generation, schemas, Gemini fallback behavior, rate limiting, stadium graph transport data, incident parsing, crowd-density aggregation, and API route integration paths for chat, health, incidents, crowd reports, and check-ins.
+Current local coverage: **12 Vitest files / 59 passing tests** covering prompt generation, schemas, Gemini fallback behavior, rate limiting (including `getClientIp` IP parsing), stadium graph transport data, incident parsing, crowd-density aggregation (including edge cases), and API route integration paths for chat, health, incidents, crowd reports, and check-ins.
 
 The GitHub Actions workflow in `.github/workflows/test.yml` runs lint, unit/integration tests, and build on every push to `main`.
