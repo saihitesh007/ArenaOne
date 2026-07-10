@@ -48,8 +48,10 @@ export default function Home() {
   const [message, setMessage] = useState('');
   const [currentZoneId, setCurrentZoneId] = useState('');
   const [checkInStatus, setCheckInStatus] = useState('No zone checked in yet.');
+  const [checkInIsError, setCheckInIsError] = useState(false);
   const [accessibilityMode, setAccessibilityMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const currentZone = currentZoneId ? getStadiumZoneById(currentZoneId) : undefined;
@@ -153,11 +155,14 @@ export default function Home() {
     const zone = currentZoneId ? getStadiumZoneById(currentZoneId) : undefined;
     if (!zone) {
       setCheckInStatus('Choose a gate or section first.');
+      setCheckInIsError(true);
       return;
     }
 
     const sessionId = getAnonymousSessionId();
     setCheckInStatus(`Checking in at ${zone.name}…`);
+    setCheckInIsError(false);
+    setIsCheckingIn(true);
 
     try {
       const response = await fetch('/api/crowd-density/check-in', {
@@ -176,10 +181,14 @@ export default function Home() {
         throw new Error(errorBody?.error ?? 'Check-in could not be saved.');
       }
 
-      setCheckInStatus(`Checked in at ${zone.name}. This is self-reported, not GPS.`);
+      setCheckInIsError(false);
+      setCheckInStatus(`✓ Checked in at ${zone.name}. Self-reported, not GPS.`);
     } catch (error) {
       console.warn('[ArenaOne] Zone check-in failed:', error);
-      setCheckInStatus('Zone saved for chat. Crowd signal could not be uploaded.');
+      setCheckInIsError(true);
+      setCheckInStatus('Zone saved for chat context. Crowd signal could not be uploaded.');
+    } finally {
+      setIsCheckingIn(false);
     }
   }
 
@@ -288,12 +297,15 @@ export default function Home() {
                       type="button"
                       className="zone-check-button"
                       onClick={() => void handleZoneCheckIn()}
-                      disabled={!currentZoneId}
+                      disabled={!currentZoneId || isCheckingIn}
                     >
-                      Check in
+                      {isCheckingIn ? 'Checking in…' : 'Check in'}
                     </button>
                   </div>
-                  <p className="zone-status" aria-live="polite">
+                  <p
+                    className={`zone-status${checkInIsError ? ' zone-status-error' : checkInStatus.startsWith('✓') ? ' zone-status-success' : ''}`}
+                    aria-live="polite"
+                  >
                     {checkInStatus}
                   </p>
                 </div>
@@ -423,7 +435,7 @@ export default function Home() {
         ) : (
           <section className="staff-view" aria-labelledby="staff-title">
             <div className="page-heading">
-              <span className="eyebrow">Feature 6</span>
+              <span className="eyebrow">Operations</span>
               <div>
                 <h1 id="staff-title">Staff Dashboard</h1>
                 <p>
@@ -510,7 +522,7 @@ function IncidentsPanel() {
             required
           />
           <button type="submit" className="btn btn-primary" disabled={isSubmitting || !description}>
-            {isSubmitting ? 'Sending...' : 'Report'}
+            {isSubmitting ? 'Sending…' : 'Report'}
           </button>
         </form>
         {message && (
@@ -609,7 +621,7 @@ function CrowdPanel({ currentZoneName }: { currentZoneName?: string }) {
           <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
             <input type="text" value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. Metro Gate 6 overcrowded" className="input" required disabled={isSubmitting} />
             <button type="submit" className="btn btn-primary" disabled={isSubmitting || !zoneId || !note}>
-              {isSubmitting ? 'Sending...' : 'Report'}
+              {isSubmitting ? 'Sending…' : 'Report'}
             </button>
           </div>
         </form>
