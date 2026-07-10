@@ -1,3 +1,4 @@
+import { LRUCache } from 'lru-cache';
 import { NextResponse } from 'next/server';
 import { buildChatPrompt } from '@/lib/chat-utils';
 import { STADIUM_GRAPH } from '@/lib/data/stadium-graph';
@@ -9,6 +10,23 @@ const RATE_LIMIT = 20;
 const RATE_WINDOW_MS = 60_000;
 const CHAT_FALLBACK =
   "I'm having trouble connecting to the stadium database. Please follow the signs to the nearest info booth.";
+
+/**
+ * In-memory response cache for identical chat queries.
+ * Key: normalised `message|accessibilityMode|zoneId` string.
+ * TTL: 10 minutes — long enough to absorb repeated identical questions during
+ * a single matchday session, short enough to stay fresh as the situation evolves.
+ * Max 200 entries covers the full set of suggested prompts many times over
+ * without consuming significant memory (~200 KB worst-case).
+ */
+const chatCache = new LRUCache<string, string>({
+  max: 200,
+  ttl: 10 * 60 * 1000, // 10 minutes
+});
+
+function buildCacheKey(message: string, accessibilityMode: boolean, zoneId?: string): string {
+  return `${message.trim().toLowerCase()}|${accessibilityMode}|${zoneId ?? ''}`;
+}
 
 export async function POST(request: Request) {
   const clientIp = getClientIp(request);
@@ -45,21 +63,45 @@ export async function POST(request: Request) {
     );
   }
 
+  const { message, accessibilityMode, currentZoneId } = validation.data;
+
+  // Check cache before calling Gemini
+  const cacheKey = buildCacheKey(message, accessibilityMode, currentZoneId);
+  const cachedResponse = chatCache.get(cacheKey);
+  if (cachedResponse) {
+    return NextResponse.json({
+      response: cachedResponse,
+      model: 'cached',
+      fallback: false,
+      geminiConfigured: isGeminiConfigured(),
+      cached: true,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
   try {
     const { prompt, systemInstruction } = buildChatPrompt({
-      message: validation.data.message,
-      accessibilityMode: validation.data.accessibilityMode,
-      currentZoneId: validation.data.currentZoneId,
+      message,
+      accessibilityMode,
+      currentZoneId,
       stadiumGraph: STADIUM_GRAPH,
     });
 
     const result = await generateContent(prompt, systemInstruction);
 
+    const responseText = result.fallback ? CHAT_FALLBACK : result.text;
+
+    // Only cache successful Gemini responses, not fallbacks
+    if (!result.fallback) {
+      chatCache.set(cacheKey, responseText);
+    }
+
     return NextResponse.json({
-      response: result.fallback ? CHAT_FALLBACK : result.text,
+      response: responseText,
       model: result.model,
       fallback: result.fallback,
       geminiConfigured: isGeminiConfigured(),
+      cached: false,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -70,6 +112,7 @@ export async function POST(request: Request) {
       model: 'fallback',
       fallback: true,
       geminiConfigured: isGeminiConfigured(),
+      cached: false,
       timestamp: new Date().toISOString(),
     });
   }
