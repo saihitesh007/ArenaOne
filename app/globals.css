@@ -453,9 +453,9 @@ input:disabled {
 }
 
 .chat-card {
-  min-height: 680px;
+  height: 680px;
   display: grid;
-  grid-template-rows: auto minmax(320px, 1fr) auto;
+  grid-template-rows: auto 1fr auto;
   overflow: hidden;
 }
 
@@ -500,12 +500,38 @@ input:disabled {
 
 .chat-log {
   min-height: 0;
-  max-height: 62vh;
+  flex: 1 1 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: var(--space-5);
   padding: var(--space-6);
+}
+
+.chat-log-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex: 1 1 0;
+  color: var(--color-subtle);
+  text-align: center;
+  padding: var(--space-8) var(--space-6);
+  pointer-events: none;
+  user-select: none;
+}
+
+.chat-log-empty svg {
+  opacity: 0.35;
+}
+
+.chat-log-empty p {
+  color: var(--color-subtle);
+  font-size: 0.92rem;
+  max-width: 280px;
+  line-height: 1.55;
 }
 
 .message-row {
@@ -658,6 +684,30 @@ input:disabled {
 .chat-form p {
   color: var(--color-subtle);
   font-size: 0.86rem;
+}
+
+/* ── Form feedback states ───────────────────────────────────────────────── */
+.form-feedback {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+}
+
+.form-feedback.success {
+  color: #bbf7d0;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.28);
+}
+
+.form-feedback.error {
+  color: #fecdd3;
+  background: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.28);
 }
 
 .dashboard-shell {
@@ -904,7 +954,6 @@ input:disabled {
   }
 
   .chat-log {
-    max-height: 54vh;
     padding: var(--space-4);
   }
 

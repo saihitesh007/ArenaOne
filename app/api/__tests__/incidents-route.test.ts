@@ -138,4 +138,25 @@ describe('/api/incidents route', () => {
 
     expect(limitedResponse.status).toBe(429);
   });
+
+  it('returns a graceful 503 error when generateIncidentDraft throws', async () => {
+    // Regression test: if Gemini/AI structuring fails, the route must NOT
+    // return 200 with an empty body — it must return a 503 with an error message,
+    // so the UI can correctly show the "Failed to submit incident" error state
+    // (rendered in red, not green).
+    mockedGenerateIncidentDraft.mockRejectedValue(new Error('Gemini API unavailable'));
+
+    const response = await POST(
+      incidentRequest(
+        {
+          description: 'steward needed at gate 2 entrance',
+        },
+        'incident-generate-failure'
+      )
+    );
+    const json = await readJson(response);
+
+    expect(response.status).toBe(503);
+    expect(json.error).toBe('Unable to submit incident right now');
+  });
 });

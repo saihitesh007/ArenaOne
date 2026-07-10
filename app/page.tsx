@@ -368,6 +368,17 @@ export default function Home() {
                     </article>
                   ))}
 
+                  {messages.length <= 1 && !isLoading && (
+                    <div className="chat-log-empty" aria-hidden="true">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
+                      <p>Ask ArenaOne about gates, food, washrooms, or transport to get started.</p>
+                    </div>
+                  )}
+
                   {isLoading && (
                     <article className="message-row message-ai" aria-label="ArenaOne is typing">
                       <div className="message-avatar" aria-hidden="true">
@@ -502,7 +513,16 @@ function IncidentsPanel() {
             {isSubmitting ? 'Sending...' : 'Report'}
           </button>
         </form>
-        {message && <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--color-success)' }}>{message}</p>}
+        {message && (
+          <p className={`form-feedback ${message.startsWith('Failed') ? 'error' : 'success'}`}>
+            {message.startsWith('Failed') ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            )}
+            {message}
+          </p>
+        )}
       </div>
 
       <div className="incident-list">
@@ -593,7 +613,16 @@ function CrowdPanel({ currentZoneName }: { currentZoneName?: string }) {
             </button>
           </div>
         </form>
-        {message && <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--color-success)' }}>{message}</p>}
+        {message && (
+          <p className={`form-feedback ${message.startsWith('Failed') ? 'error' : 'success'}`}>
+            {message.startsWith('Failed') ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            )}
+            {message}
+          </p>
+        )}
       </div>
 
       {currentZoneName && (
