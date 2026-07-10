@@ -58,9 +58,12 @@ export function rateLimit(
 }
 
 /**
- * Extract client IP from request headers.
- * Handles x-forwarded-for (common behind proxies/Vercel) and
- * falls back to 'anonymous'.
+ * Extracts the client IP address from the incoming request.
+ * Handles `x-forwarded-for` (set by Vercel/proxies) and falls back to
+ * the literal string `'anonymous'` when no IP is determinable.
+ *
+ * @param request - The incoming HTTP Request object.
+ * @returns The first IP in the x-forwarded-for chain, or `'anonymous'`.
  */
 export function getClientIp(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for');

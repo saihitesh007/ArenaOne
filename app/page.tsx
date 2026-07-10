@@ -497,8 +497,8 @@ function IncidentsPanel() {
         <span className="subtle-badge warning">3 open</span>
       </div>
 
-      <div className="report-form-card" style={{ marginBottom: 'var(--space-6)', padding: 'var(--space-4)', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-lg)' }}>
-        <h3 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-2)' }}>Volunteer & Staff Incident Report</h3>
+      <div className="report-form-card" style={{ marginBottom: 'var(--space-6)', padding: 'var(--space-4)', backgroundColor: 'var(--color-surface-raised)', borderRadius: 'var(--radius-lg)' }}>
+        <h3 style={{ fontSize: '1.05rem', marginBottom: 'var(--space-2)' }}>Volunteer & Staff Incident Report</h3>
         <form onSubmit={submitIncident} style={{ display: 'flex', gap: 'var(--space-2)' }}>
           <input 
             type="text" 
@@ -592,8 +592,8 @@ function CrowdPanel({ currentZoneName }: { currentZoneName?: string }) {
         <span className="subtle-badge">Shared pipeline</span>
       </div>
 
-      <div className="report-form-card" style={{ marginBottom: 'var(--space-6)', padding: 'var(--space-4)', backgroundColor: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-lg)' }}>
-        <h3 style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-2)' }}>Volunteer & Staff Crowd / Transport Report</h3>
+      <div className="report-form-card" style={{ marginBottom: 'var(--space-6)', padding: 'var(--space-4)', backgroundColor: 'var(--color-surface-raised)', borderRadius: 'var(--radius-lg)' }}>
+        <h3 style={{ fontSize: '1.05rem', marginBottom: 'var(--space-2)' }}>Volunteer & Staff Crowd / Transport Report</h3>
         <form onSubmit={submitReport} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
             <select value={zoneId} onChange={(e) => setZoneId(e.target.value)} className="input" required>
