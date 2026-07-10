@@ -469,7 +469,7 @@ function IncidentsPanel() {
       if (!res.ok) throw new Error('Submission failed');
       setDescription('');
       setMessage('Incident reported successfully.');
-    } catch (err) {
+    } catch {
       setMessage('Failed to submit incident.');
     } finally {
       setIsSubmitting(false);
@@ -554,7 +554,7 @@ function CrowdPanel({ currentZoneName }: { currentZoneName?: string }) {
       setNote('');
       setZoneId('');
       setMessage('Report submitted.');
-    } catch (err) {
+    } catch {
       setMessage('Failed to submit report.');
     } finally {
       setIsSubmitting(false);
@@ -580,7 +580,7 @@ function CrowdPanel({ currentZoneName }: { currentZoneName?: string }) {
               <option value="">Select zone...</option>
               {STADIUM_ZONES.map(z => <option key={z.id} value={z.id}>{z.name}</option>)}
             </select>
-            <select value={category} onChange={(e) => setCategory(e.target.value as any)} className="input" style={{ maxWidth: '160px' }}>
+            <select value={category} onChange={(e) => setCategory(e.target.value as 'crowd' | 'sustainability' | 'transport')} className="input" style={{ maxWidth: '160px' }}>
               <option value="crowd">Crowd</option>
               <option value="transport">Transport</option>
               <option value="sustainability">Sustainability</option>
